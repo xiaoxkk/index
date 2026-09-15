@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>仓库库存 - 仓库管理平台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+    .navbar {
+      background: #1f1f1f; padding: 12px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .navbar .title { color: #fff; font-size: 18px; font-weight: bold; text-decoration: none; }
+    .navbar .nav-links { display: flex; gap: 12px; align-items: center; }
+    .navbar .nav-links a {
+      color: #ccc; text-decoration: none; padding: 6px 14px;
+      border-radius: 4px; font-size: 14px; transition: all 0.2s;
+    }
+    .navbar .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+
+    .page-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .page-header h2 { font-size: 20px; color: #333; }
+
+    /* 仓库筛选标签 */
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 6px 16px; border: 1px solid #ddd; background: #fff;
+      border-radius: 20px; cursor: pointer; font-size: 13px;
+      color: #666; transition: all 0.2s; text-decoration: none;
+    }
+    .filter-btn:hover { border-color: #4CAF50; color: #4CAF50; }
+    .filter-btn.active { background: #4CAF50; color: #fff; border-color: #4CAF50; }
+
+    /* 库存卡片网格 */
+    .inventory-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .inventory-card {
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 20px; transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .inventory-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px);
+    }
+    .card-img {
+      width: 100%; height: 160px; object-fit: cover; border-radius: 6px;
+      margin-bottom: 12px; background: #f0f0f0;
+    }
+    .card-goods-name { font-size: 16px; font-weight: 600; color: #1f1f1f; margin-bottom: 6px; }
+    .card-warehouse {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; background: #E8F5E9; color: #2E7D32; margin-bottom: 10px;
+    }
+    .card-stock { font-size: 14px; color: #666; }
+    .card-stock span { font-size: 22px; font-weight: 700; color: #4CAF50; }
+
+    .empty-tip {
+      text-align: center; color: #999; padding: 60px 0; font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="title">仓库管理平台</a>
+  <div class="nav-links">
+    <a href="/category">🏠 品类查询</a>
+    <a href="/inventory/list" style="color:#4CAF50;">📦 仓库库存</a>
+    <a th:if="${session.loginUser == null}" href="/user/toLogin">前往登录</a>
+    <a th:if="${session.loginUser != null}" href="/user/logout">退出登录</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <span>📦</span>
+    <h2>仓库库存</h2>
+  </div>
+
+  <!-- 仓库筛选 -->
+  <div class="filter-bar">
+    <a href="/inventory/list" class="filter-btn" th:classappend="${selectedWid == null} ? 'active' : ''">全部仓库</a>
+    <a th:each="wh : ${warehouses}"
+       th:href="@{/inventory/list(wid=${wh.wid})}"
+       class="filter-btn"
+       th:classappend="${selectedWid == wh.wid} ? 'active' : ''"
+       th:text="${wh.wname}">仓库名</a>
+  </div>
+
+  <!-- 库存卡片 -->
+  <div class="inventory-grid" th:if="${not #lists.isEmpty(items)}">
+    <div class="inventory-card" th:each="item : ${items}">
+      <div class="card-img" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:40px;">📦</div>
+      <div class="card-goods-name" th:text="${item.goodsName}">商品名</div>
+      <div class="card-warehouse" th:text="${item.warehouseName}">仓库名</div>
+      <div class="card-stock">库存：<span th:text="${item.quantity}">0</span> 件</div>
+    </div>
+  </div>
+
+  <div class="empty-tip" th:if="${#lists.isEmpty(items)}">
+    暂无库存记录
+  </div>
+</div>
+</body>
+</html>

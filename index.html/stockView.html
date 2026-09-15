@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存查询</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .navbar a:hover {
+            background-color: #3a3a3a;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* 搜索表单 */
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        
+        .search-card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .search-form input {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+        }
+        
+        .search-form button {
+            padding: 10px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .search-form button:hover {
+            background-color: #45a049;
+        }
+        
+        /* 表格卡片 */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .table-card h2 {
+            padding: 20px 24px;
+            font-size: 18px;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+            margin: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 14px 24px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        tr:hover {
+            background-color: #fafafa;
+        }
+        
+        tr.alert-row {
+            background-color: #fff5f5 !important;
+        }
+        
+        tr.alert-row:hover {
+            background-color: #ffebee !important;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-normal {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-alert {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .quantity-cell {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <h1>📦 库存查询</h1>
+        <div class="nav-links">
+            <a th:href="@{/admin}" class="nav-link">🏠 返回管理后台</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 搜索表单 -->
+        <div class="search-card">
+            <h2>🔍 搜索条件</h2>
+            <form class="search-form" th:action="@{/stock/view}" method="get">
+                <input type="text" name="gname" th:value="${gname}" placeholder="商品名称" />
+                <button type="submit">搜索</button>
+            </form>
+        </div>
+
+        <!-- 库存表格 -->
+        <div class="table-card">
+            <h2>📊 库存列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品ID</th>
+                        <th>商品名称</th>
+                        <th>库存数量</th>
+                        <th>预警数量</th>
+                        <th>商品单价</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${list}" th:class="${item.quantity <= item.alertQuantity} ? 'alert-row' : ''">
+                        <td th:text="${item.gid}"></td>
+                        <td th:text="${item.gname}"></td>
+                        <td class="quantity-cell" th:text="${item.quantity}"></td>
+                        <td th:text="${item.alertQuantity}"></td>
+                        <td th:text="${item.price}"></td>
+                        <td>
+                            <span th:if="${item.quantity <= item.alertQuantity}" class="status-badge status-alert">库存预警</span>
+                            <span th:if="${item.quantity > item.alertQuantity}" class="status-badge status-normal">正常</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

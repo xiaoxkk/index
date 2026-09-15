@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>修改用户</title>
+</head>
+<body>
+<h3 align="center">修改用户</h3>
+<form th:action="@{/user/update}" method="post" style="width:400px;margin:0 auto;">
+  <!--隐藏域存主键uid，必须携带-->
+  <input type="hidden" name="uid" th:value="${user.uid}">
+  <p>账号：<input type="text" name="uname" th:value="${user.uname}"></p>
+  <p>密码：<input type="password" name="upwd" th:value="${user.upwd}"></p>
+  <p>性别：<input type="text" name="usex" th:value="${user.usex}"></p>
+  <p>角色：<input type="text" name="role" th:value="${user.role}"></p>
+  <p><input type="submit" value="保存修改"></p>
+</form>
+</body>
+</html>

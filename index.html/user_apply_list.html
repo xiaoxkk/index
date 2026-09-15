@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的申请记录 - 仓库管理平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #3a3a3a;
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* 搜索表单 */
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .search-card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 200px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #555;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* 表格卡片 */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 24px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background-color: #fafafa;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-approved {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-rejected {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        /* 类型标签 */
+        .type-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .type-in {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .type-out {
+            background: #FCE4EC;
+            color: #C2185B;
+        }
+
+        .type-reserve {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <h1>📋 我的申请记录</h1>
+        <div class="nav-links">
+            <a th:href="@{/user}">🏠 用户中心</a>
+            <a th:href="@{/user/logout}">🔓 退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 搜索表单 -->
+        <div class="search-card">
+            <h2>🔍 搜索条件</h2>
+            <form class="search-form" th:action="@{/apply/view}" method="get">
+                <div class="form-group">
+                    <label>商品名称</label>
+                    <input type="text" name="gname" th:value="${gname}" placeholder="输入商品名称">
+                </div>
+                <div class="form-group">
+                    <label>审核状态</label>
+                    <select name="status">
+                        <option value="">全部状态</option>
+                        <option value="0" th:selected="${status != null && status == 0}">待审核</option>
+                        <option value="1" th:selected="${status != null && status == 1}">已通过</option>
+                        <option value="2" th:selected="${status != null && status == 2}">已驳回</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">搜索</button>
+                <a th:href="@{/apply/view}" class="btn btn-secondary">重置</a>
+            </form>
+        </div>
+
+        <!-- 申请记录表格 -->
+        <div class="table-card">
+            <div class="table-header">
+                <h2>📊 申请列表</h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>申请编号</th>
+                        <th>商品名称</th>
+                        <th>申请类型</th>
+                        <th>申请数量</th>
+                        <th>审核状态</th>
+                        <th>申请时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="record : ${allRecords}">
+                        <td th:text="${record.id}"></td>
+                        <td th:text="${record.goodsName}"></td>
+                        <td>
+                            <span th:if="${record.type == '入库申请'}" class="type-tag type-in">入库申请</span>
+                            <span th:if="${record.type == '出库申请'}" class="type-tag type-out">出库申请</span>
+                            <span th:if="${record.type == '商品预约'}" class="type-tag type-reserve">商品预约</span>
+                        </td>
+                        <td th:text="${record.quantity}"></td>
+                        <td>
+                            <span th:if="${record.status == 0}" class="status-tag status-pending">⏳ 待审核</span>
+                            <span th:if="${record.status == 1}" class="status-tag status-approved">✅ 已通过</span>
+                            <span th:if="${record.status == 2}" class="status-tag status-rejected">❌ 已驳回</span>
+                        </td>
+                        <td th:text="${#dates.format(record.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(allRecords)}">
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>暂无申请记录</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

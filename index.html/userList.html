@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>用户申请管理</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+
+<h3>用户出入库申请管理</h3>
+
+<table border="1" width="100%" class="mt-3">
+  <tr>
+    <th>ID</th>
+    <th>商品ID</th>
+    <th>类型</th>
+    <th>数量</th>
+    <th>申请人</th>
+    <th>状态</th>
+    <th>操作</th>
+  </tr>
+  <!-- 返回后台管理按钮 -->
+  <div style="margin: 20px 0;">
+    <a href="http://localhost:8080/admin" class="btn btn-primary">
+      返回管理后台
+    </a>
+  </div>
+  <!-- ✅ 关键修复：加了非空判断 item != null，绝对不报错 -->
+  <tr th:each="item : ${applyList}" th:if="${item != null}">
+    <td th:text="${item.id}"></td>
+    <td th:text="${item.gid}"></td>
+    <td th:text="${item.type == 1 ? '入库' : '出库'}"></td>
+    <td th:text="${item.quantity}"></td>
+    <td th:text="${item.uname}"></td>
+
+    <!-- 状态显示：待审批 / 已通过 / 已驳回 -->
+    <td th:text="${item.status == 0 ? '待审批' : (item.status == 1 ? '已通过' : '已驳回')}"></td>
+
+    <td>
+      <!-- 待审批 → 显示 通过 + 驳回 -->
+      <a th:if="${item.status == 0}"
+         th:href="@{/user/approve(id=${item.id},type=${item.type},gid=${item.gid},quantity=${item.quantity})}"
+         style="color:green; margin-right:10px;">通过</a>
+
+      <a th:if="${item.status == 0}"
+         th:href="@{/user/reject(id=${item.id})}"
+         style="color:red;">驳回</a>
+
+      <!-- 已通过 → 只显示文字 -->
+      <span th:if="${item.status == 1}" style="color:green; display:block;">已通过</span>
+
+      <!-- 已驳回 → 只显示文字 -->
+      <span th:if="${item.status == 2}" style="color:red; display:block;">已驳回</span>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

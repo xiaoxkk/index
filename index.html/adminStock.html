@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>管理员 - 库存查询</title>
+  <style>
+    body{margin:20px; font-family:Arial, sans-serif;}
+    table{border-collapse:collapse; width:100%; margin-top:10px;}
+    th,td{border:1px solid #ccc; padding:8px; text-align:center;}
+    th{background:#f5f5f5;}
+    .back-btn{
+      padding:6px 12px;
+      background:#409eff;
+      color:white;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    /* 预警样式 */
+    .low-stock {
+      background-color: #ffcccc !important;
+    }
+  </style>
+</head>
+<body>
+<h2>管理员 - 库存查询</h2>
+<a href="/admin" class="back-btn">返回管理员主页</a>
+
+<table class="table table-bordered table-hover">
+  <thead>
+  <tr>
+    <th>商品ID</th>
+    <th>商品名称</th>
+    <th>库存数量</th>
+    <th>预警数量</th>
+    <th>商品单价</th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- 这里必须是 th:classappend，不能漏 th: -->
+  <tr th:each="item : ${list}"
+      th:classappend="${item.quantity < item.alertQuantity} ? 'low-stock' : ''">
+    <td th:text="${item.gid}"></td>
+    <td th:text="${item.gname}"></td>
+    <td th:text="${item.quantity}"></td>
+    <td th:text="${item.alertQuantity}"></td>
+    <td th:text="${item.price}"></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

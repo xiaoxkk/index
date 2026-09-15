@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>品类查询 - 仓库管理</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      background: #1f1f1f; color: white; padding: 0 40px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar-left { display: flex; align-items: center; gap: 28px; }
+    .navbar-brand { font-size: 20px; font-weight: 700; color: #fff; text-decoration: none; }
+    .cat-dropdown { position: relative; }
+    .cat-dropdown-trigger {
+      color: #ccc; font-size: 15px; cursor: pointer;
+      padding: 8px 14px; border-radius: 6px; transition: all 0.3s;
+      display: flex; align-items: center; gap: 4px; user-select: none;
+    }
+    .cat-dropdown-trigger:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .cat-dropdown-menu {
+      display: none; position: absolute; top: calc(100%); left: 0;
+      background: #2a2a2a; border-radius: 8px; min-width: 160px;
+      padding: 6px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .cat-dropdown:hover .cat-dropdown-menu { display: block; }
+    .cat-dropdown-menu a {
+      display: block; color: #ccc; text-decoration: none;
+      padding: 10px 20px; font-size: 14px; transition: all 0.2s;
+    }
+    .cat-dropdown-menu a:hover { color: #fff; background: #4CAF50; }
+    .navbar-right { display: flex; align-items: center; gap: 16px; }
+    .nav-link { color: #ccc; text-decoration: none; font-size: 14px; transition: color 0.3s; }
+    .nav-link:hover { color: #fff; }
+    .user-info { color: #ccc; font-size: 14px; }
+    .btn-logout {
+      background: transparent; border: 1px solid #4CAF50; color: #4CAF50;
+      padding: 6px 16px; border-radius: 6px; text-decoration: none;
+      font-size: 13px; transition: all 0.3s;
+    }
+    .btn-logout:hover { background: #4CAF50; color: #fff; }
+    .btn-login {
+      background: #4CAF50; color: white; padding: 8px 20px;
+      border-radius: 6px; text-decoration: none; font-size: 14px;
+      transition: background 0.3s;
+    }
+    .btn-login:hover { background: #43A047; }
+
+    /* 主体 */
+    .main-wrapper {
+      flex: 1; display: flex; max-width: 1400px; width: 100%;
+      margin: 0 auto; padding: 24px 40px; gap: 24px;
+    }
+
+    /* 左侧分类栏 */
+    .sidebar {
+      width: 200px; flex-shrink: 0; background: #fff;
+      border: 1px solid #e0e0e0; border-radius: 8px;
+      overflow: hidden; align-self: flex-start;
+      position: sticky; top: 84px;
+    }
+    .sidebar-title {
+      background: #1f1f1f; color: #fff;
+      padding: 14px 20px; font-size: 15px; font-weight: 600;
+    }
+    .sidebar-list { list-style: none; }
+    .sidebar-list li a {
+      display: block; padding: 12px 20px; color: #333;
+      text-decoration: none; font-size: 14px;
+      border-bottom: 1px solid #f5f5f5; transition: all 0.2s;
+    }
+    .sidebar-list li a:hover { background: #f0f7f0; color: #4CAF50; }
+    .sidebar-list li a.active {
+      background: #e8f5e9; color: #4CAF50; font-weight: 600;
+      border-left: 3px solid #4CAF50;
+    }
+
+    /* 右侧内容 */
+    .content-area { flex: 1; min-width: 0; }
+
+    /* 内容头部 + 搜索 */
+    .content-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .content-title { font-size: 18px; font-weight: 700; color: #1f1f1f; }
+    .search-box {
+      display: flex; align-items: center; gap: 0;
+      background: #fff; border: 1px solid #ddd; border-radius: 20px;
+      overflow: hidden; transition: border-color 0.3s;
+    }
+    .search-box:focus-within { border-color: #4CAF50; }
+    .search-box input {
+      border: none; outline: none; padding: 8px 16px;
+      font-size: 14px; width: 200px; background: transparent;
+    }
+    .search-box button {
+      background: #4CAF50; color: #fff; border: none;
+      padding: 8px 14px; cursor: pointer; font-size: 14px;
+      transition: background 0.3s;
+    }
+    .search-box button:hover { background: #43A047; }
+
+    /* 搜索提示 */
+    .search-tip {
+      background: #e8f5e9; color: #2e7d32; padding: 10px 16px;
+      border-radius: 6px; font-size: 13px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .search-tip a { color: #4CAF50; text-decoration: underline; margin-left: 8px; }
+
+    /* 商品网格 */
+    .goods-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .goods-card {
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 20px 16px; text-decoration: none; color: #333;
+      display: flex; flex-direction: column; align-items: center;
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .goods-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px);
+    }
+    .goods-card.pinned {
+      border: 2px solid #4CAF50;
+      box-shadow: 0 2px 12px rgba(76,175,80,0.15);
+    }
+    .goods-icon { font-size: 36px; margin-bottom: 10px; }
+    .goods-name {
+      font-size: 15px; font-weight: 600; color: #1f1f1f;
+      margin-bottom: 4px; text-align: center;
+    }
+    .goods-price { font-size: 18px; font-weight: 700; color: #f44336; }
+    .goods-price .unit { font-size: 12px; color: #999; font-weight: 400; }
+    .goods-stock { font-size: 12px; color: #999; margin-top: 4px; }
+
+    /* 空状态 */
+    .empty-state {
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 60px 40px; text-align: center;
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-text { color: #999; font-size: 15px; }
+    .empty-text a { color: #4CAF50; text-decoration: none; }
+    .empty-text a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<div class="navbar">
+  <div class="navbar-left">
+    <a class="navbar-brand" href="/">仓库管理平台</a>
+    <div class="cat-dropdown">
+      <div class="cat-dropdown-trigger">📂 品类 ▾</div>
+      <div class="cat-dropdown-menu">
+        <a th:each="cat : ${categories}" th:href="@{/category(cid=${cat.cid})}" th:text="${cat.cname}">分类</a>
+        <a th:href="@{/category}">全部商品</a>
+      </div>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <a class="nav-link" href="/user">🏠 回主页</a>
+    <span th:if="${session.loginUser != null}" class="user-info" th:text="'👤 ' + ${session.loginUser.uname}"></span>
+    <a th:if="${session.loginUser != null}" class="btn-logout" href="/user/logout">退出登录</a>
+    <a th:if="${session.loginUser == null}" class="btn-login" href="/user/toLogin">前往登录</a>
+  </div>
+</div>
+
+<!-- 主体 -->
+<div class="main-wrapper">
+
+  <!-- 左侧分类栏 -->
+  <div class="sidebar">
+    <div class="sidebar-title">📂 商品分类</div>
+    <ul class="sidebar-list">
+      <li><a th:href="@{/category}" th:classappend="${currentCid == null} ? 'active' : ''">全部商品</a></li>
+      <li th:each="cat : ${categories}">
+        <a th:href="@{/category(cid=${cat.cid})}"
+           th:text="${cat.cname}"
+           th:classappend="${currentCid != null and currentCid == cat.cid} ? 'active' : ''">分类</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 右侧内容 -->
+  <div class="content-area">
+
+    <!-- 头部 + 搜索 -->
+    <div class="content-header">
+      <div class="content-title" th:text="${currentCname != null} ? ${currentCname} : '全部商品'">全部商品</div>
+      <form class="search-box" th:action="@{/category/search}" method="get">
+        <input type="text" name="keyword" placeholder="搜索商品名称..."
+               th:value="${searchKeyword}">
+        <input type="hidden" name="from" value="category">
+        <button type="submit">🔍</button>
+      </form>
+    </div>
+
+    <!-- 搜索提示 -->
+    <div class="search-tip" th:if="${searchKeyword}">
+      🔎 搜索 "<strong th:text="${searchKeyword}"></strong>" 的结果已置顶显示
+      <a th:href="@{/category}">✕ 清除搜索</a>
+    </div>
+
+    <!-- 商品网格 -->
+    <div class="goods-grid" th:if="${goodsList != null and !goodsList.isEmpty()}">
+      <a th:each="goods : ${goodsList}"
+         th:href="@{/category/detail(gid=${goods.gid})}"
+         class="goods-card"
+         th:classappend="${matchIds != null and matchIds.contains(goods.gid)} ? 'pinned' : ''">
+        <div class="goods-icon">📦</div>
+        <div class="goods-name" th:text="${goods.gname}">商品名</div>
+        <div class="goods-price">
+          ¥<span th:text="${goods.price}">0</span>
+          <span class="unit" th:text="'/' + ${goods.unit}">/个</span>
+        </div>
+        <div class="goods-stock" th:text="'库存: ' + ${goods.quantity}">库存: 0</div>
+      </a>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" th:if="${goodsList == null or goodsList.isEmpty()}">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">
+        暂无商品
+        <a th:href="@{/category}">查看全部</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

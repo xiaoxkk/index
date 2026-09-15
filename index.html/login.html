@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>仓储系统-登录</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 40px;
+      width: 400px;
+    }
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #1f1f1f;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .form-group input:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+    .role-select {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .role-option {
+      flex: 1;
+      position: relative;
+    }
+    .role-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .role-option label {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.3s;
+    }
+    .role-option input[type="radio"]:checked + label {
+      border-color: #4CAF50;
+      color: #4CAF50;
+      background: #f1f8f1;
+    }
+    .role-icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .btn-login {
+      width: 100%;
+      background: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-login:hover { background: #43A047; }
+    .msg {
+      color: #e53935;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+    .back-link a {
+      color: #4CAF50;
+      text-decoration: none;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>仓库管理平台</h2>
+  <p class="msg" th:if="${msg}" th:text="${msg}"></p>
+  <form action="/user/login" method="post">
+    <div class="role-select">
+      <div class="role-option">
+        <input type="radio" id="roleUser" name="role" value="user" checked>
+        <label for="roleUser">
+          <span class="role-icon">👤</span>用户登录
+        </label>
+      </div>
+      <div class="role-option">
+        <input type="radio" id="roleAdmin" name="role" value="admin">
+        <label for="roleAdmin">
+          <span class="role-icon">🔑</span>管理员登录
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>账号</label>
+      <input type="text" name="uname" placeholder="请输入账号" required>
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" name="upwd" placeholder="请输入密码" required>
+    </div>
+    <button class="btn-login" type="submit">登 录</button>
+  </form>
+  <div class="back-link">
+    <a href="/user/toReg">没有账号？前往注册</a>
+  </div>
+  <div class="back-link">
+    <a href="/index">← 返回首页</a>
+  </div>
+</div>
+
+</body>
+</html>

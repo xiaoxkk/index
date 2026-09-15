@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>仓库管理平台 - 管理后台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+        .navbar { background: #1f1f1f; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .title { color: #fff; font-size: 18px; font-weight: bold; }
+        .navbar .nav-links { display: flex; gap: 12px; align-items: center; }
+        .navbar .nav-links a { color: #ccc; text-decoration: none; padding: 6px 14px; border-radius: 4px; font-size: 14px; transition: all 0.2s; }
+        .navbar .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+        .main-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+        .cards-wrapper { display: flex; flex-wrap: wrap; gap: 30px; max-width: 960px; width: 100%; }
+
+        .card {
+            flex: 1;
+            min-width: 300px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            cursor: pointer;
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .card-icon { font-size: 40px; margin-bottom: 12px; }
+        .card-title { font-size: 20px; font-weight: 700; color: #1f1f1f; margin-bottom: 6px; }
+        .card-desc { font-size: 13px; color: #999; text-align: center; line-height: 1.5; }
+
+        .welcome-msg { text-align: center; margin-bottom: 30px; font-size: 16px; color: #666; }
+        .welcome-msg span { color: #4CAF50; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="title">仓库管理平台</div>
+    <div class="nav-links">
+        <a href="/user">🏠 前台首页</a>
+        <a href="/logout">🔓 退出登录</a>
+    </div>
+</div>
+
+<div class="main-container">
+    <div>
+        <div class="welcome-msg">欢迎管理员：<span th:text="${session.loginUser?.uname}"></span></div>
+        <div class="cards-wrapper">
+            <div class="card" onclick="location.href='/goods/list'">
+                <div class="card-icon">📦</div>
+                <div class="card-title">商品管理</div>
+                <div class="card-desc">商品增删改查管理</div>
+            </div>
+            <div class="card" onclick="location.href='/inbound/list'">
+                <div class="card-icon">📋</div>
+                <div class="card-title">入库出库</div>
+                <div class="card-desc">入库、出库单据管理</div>
+            </div>
+            <div class="card" onclick="location.href='/stock/view'">
+                <div class="card-icon">📊</div>
+                <div class="card-title">库存查看</div>
+                <div class="card-desc">全量库存数据查询</div>
+            </div>
+            <div class="card" onclick="location.href='/reservation/admin'">
+                <div class="card-icon">📅</div>
+                <div class="card-title">申请处理</div>
+                <div class="card-desc">商品预约申请审核管理</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

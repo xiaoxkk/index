@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>用户首页</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+<a th:href="@{/apply/view}" class="btn btn-warning">取货/退货申请</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>用户操作界面</h2>
+  <a th:href="@{/logout}" class="btn btn-danger">退出登录</a>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h3>库存查询</h3>
+        <a th:href="@{/stock/view}" class="btn btn-primary">进入查看</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h3>出入库记录</h3>
+        <a th:href="@{/inbound/list}" class="btn btn-success">进入查看</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
