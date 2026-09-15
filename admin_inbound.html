@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>出入库记录 - 仓库管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f5f5f5; min-height: 100vh; }
+
+        .navbar { background: #1f1f1f; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .title { color: #fff; font-size: 18px; font-weight: bold; }
+        .navbar .nav-links { display: flex; gap: 12px; align-items: center; }
+        .navbar .nav-links a { color: #ccc; text-decoration: none; padding: 6px 14px; border-radius: 4px; font-size: 14px; transition: all 0.2s; }
+        .navbar .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .navbar .nav-links a.active { color: #4CAF50; border: 1px solid #4CAF50; }
+
+        .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+        .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .page-header h2 { font-size: 20px; color: #333; }
+        .add-btn { padding: 8px 20px; background: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: auto; transition: background 0.2s; }
+        .add-btn:hover { background: #43A047; }
+
+        .table-wrapper { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        thead { background: #fafafa; }
+        th { padding: 12px 14px; text-align: left; color: #666; font-weight: 600; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+        td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        tr:hover td { background: #f9f9f9; }
+
+        .type-tag { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .type-in { background: #E3F2FD; color: #1976D2; }
+        .type-out { background: #FFEBEE; color: #C62828; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border-radius: 8px; padding: 24px; width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .modal h3 { font-size: 18px; color: #333; margin-bottom: 20px; }
+        .modal label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; margin-top: 12px; }
+        .modal select, .modal input { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; }
+        .modal select:focus, .modal input:focus { border-color: #4CAF50; }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+        .modal-btns button { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .modal-cancel { background: #eee; color: #666; }
+        .modal-cancel:hover { background: #ddd; }
+        .modal-submit { background: #4CAF50; color: #fff; }
+        .modal-submit:hover { background: #43A047; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="title">仓库管理平台</div>
+    <div class="nav-links">
+        <a href="/admin" class="active">📋 返回管理后台</a>
+        <a href="/logout">🔓 退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <span>📦</span>
+        <h2>出入库记录</h2>
+        <button class="add-btn" onclick="showAddModal()">+ 新增入库</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>商品ID</th>
+                <th>商品名称</th>
+                <th>类型</th>
+                <th>数量</th>
+                <th>操作人</th>
+                <th>时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${records}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.gid}"></td>
+                <td th:text="${item.goodsName != null ? item.goodsName : '未知商品'}"></td>
+                <td>
+                    <span th:if="${item.type == 'in'}" class="type-tag type-in">入库</span>
+                    <span th:if="${item.type == 'out'}" class="type-tag type-out">出库</span>
+                </td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${item.operator != null ? item.operator : '系统'}"></td>
+                <td th:text="${item.time}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(records)}">
+                <td colspan="7" style="text-align:center;color:#999;padding:40px;">暂无出入库记录</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 新增入库弹窗 -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <h3>新增入库</h3>
+        <form method="POST" action="/inbound/submit">
+            <label>商品</label>
+            <select name="gid" required>
+                <option value="">请选择商品</option>
+                <option th:each="g : ${goodsList}" th:value="${g.gid}" th:text="${g.gname}"></option>
+            </select>
+
+            <label>入库数量</label>
+            <input type="number" name="quantity" min="1" required placeholder="请输入数量">
+
+            <label>入库仓库</label>
+            <select name="wid" required>
+                <option value="">请选择仓库</option>
+                <option th:each="wh : ${warehouses}" th:value="${wh.wid}" th:text="${wh.wname}"></option>
+            </select>
+
+            <div class="modal-btns">
+                <button type="button" class="modal-cancel" onclick="hideAddModal()">取消</button>
+                <button type="submit" class="modal-submit">确认入库</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAddModal() { document.getElementById('addModal').classList.add('show'); }
+    function hideAddModal() { document.getElementById('addModal').classList.remove('show'); }
+</script>
+
+</body>
+</html>
